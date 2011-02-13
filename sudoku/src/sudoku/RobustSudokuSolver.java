@@ -13,7 +13,7 @@ public class RobustSudokuSolver {
 	public String authors() {
 		String ret = "NAMES OF THE AUTHORS AND THEIR STUDENT IDs (1 PER LINE)\n";
 		ret += "Yi (Armand) Li 61420048\n";
-		ret += "Jeff Chang \n";
+		ret += "Jeff Cheung 66990462\n";
 		return ret;
 	}
 
