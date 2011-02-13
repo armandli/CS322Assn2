@@ -1,6 +1,7 @@
 package sudoku;
 
 import java.util.BitSet;
+import java.util.Stack;
 
 public class SudokuSolver {
 	public static final int NULL = 0;
@@ -23,7 +24,8 @@ public class SudokuSolver {
 	 */
 	public int[][] solve(int[][] board) {
 		BitSet[][] domains = makeDomain(board);
-		domainSplit(domains, board);
+		Stack<Constraint> stack = initConstraints(board);
+		domainSplit(domains, board, stack);
 		return board;
 	}
 	
@@ -71,33 +73,15 @@ public class SudokuSolver {
 					needRecheck = true;
 				}
 			}
-		if (domains[ax][ay].cardinality() == 0){
-			needRecheck = false;
-		}
 		return needRecheck;
 	}
 	
-	void checkConstraintSet(BitSet[][] domains, int x, int y){
-		for (int i = 0; i < domains.length; ++i){
-			// check row constraints
-			if (y != i)
-				checkConstraint(domains, x, y, x, i);
-			// check column constraints
-			if (x != i)
-				checkConstraint(domains, x, y, i, y);
-			// check square constraints
-			int sx = x / 3, sy = y / 3, offx = i / 3, offy = i % 3;
-			sx = sx * 3 + offx; sy = sy * 3 + offy;
-			if (sx != x || sy != y)
-				checkConstraint(domains, x, y, sx, sy);
+	void gac(BitSet[][] domains, int[][] board, Stack<Constraint> stack){
+		while (!stack.isEmpty()){
+			Constraint c = stack.pop();
+			if (checkConstraint(domains, c.ax, c.ay, c.bx, c.by))
+				addConstraint(stack, c.ax, c.ay, board);
 		}
-	}
-	
-	void gac(BitSet[][] domains, int[][] board){
-		int domSize = domainSize(board);
-		for (int i = 0; i < domSize; ++i)
-			for (int j = 0; j < domSize; ++j)
-				checkConstraintSet(domains, i, j);
 	}
 	
 	void splitDomain(BitSet[][] domains, int x, int y, BitSet b1, BitSet b2){
@@ -123,8 +107,8 @@ public class SudokuSolver {
 		return ret;
 	}
 	
-	void domainSplit(BitSet[][] domains, int[][] board){
-		gac(domains, board);
+  void domainSplit(BitSet[][] domains, int[][] board, Stack<Constraint> stack){
+		gac(domains, board, stack);
 		boolean fin = true;
 		for (int i = 0; i < board.length; ++i)
 			for (int j = 0; j < board.length && fin; ++j){
@@ -137,11 +121,14 @@ public class SudokuSolver {
 					splitDomain(domains, i, j, b1, b2);
 					BitSet[][] splitted = cloneDomain(domains);
 					splitted[i][j] = b1;
-					domainSplit(splitted, board);
+					Stack<Constraint> s = new Stack<Constraint>();
+					addConstraint(s, i, j, board);
+					domainSplit(splitted, board, s);
 					splitted = cloneDomain(domains);
 					splitted[i][j] = b2;
-					domainSplit(splitted, board);
-
+					s = new Stack<Constraint>();
+					addConstraint(s, i, j, board);
+					domainSplit(splitted, board, s);
 				}
 			}
 		if (fin){
@@ -152,5 +139,44 @@ public class SudokuSolver {
 			return;
 		}
 	}
+  
+	void addConstraint(Stack<Constraint> stack, int vx, int vy, int[][] board){
+		for (int k = 0; k < board.length; ++k){
+			if (k != vy)
+				stack.add(new Constraint(vx, k, vx, vy));
+			if (k != vx)
+				stack.add(new Constraint(k, vy, vx, vy));
+			int sx = vx / 3, sy = vy / 3, offx = k / 3, offy = k % 3;
+			sx = sx * 3 + offx;
+			sy = sy * 3 + offy;
+			if (sx != vx && sy != vy)
+				stack.add(new Constraint(sx, sy, vx, vy));
+		}
+	}
 	
+	Stack<Constraint> initConstraints(int[][] board){
+		Stack<Constraint> stack = new Stack<Constraint>();
+		for (int i = 0; i < board.length; ++i)
+			for (int j = 0; j < board.length; ++j)
+				for (int k = 0; k < board.length; ++k){
+					if (k != j)
+						stack.add(new Constraint(i, j, i, k));
+					if (k != i)
+						stack.add(new Constraint(i, j, k ,j));
+					int sx = i / 3, sy = j / 3, offx = k / 3, offy = k % 3;
+					sx = sx * 3 + offx;
+					sy = sy * 3 + offy;
+					if (sx != i && sy != j)
+						stack.add(new Constraint(i, j, sx, sy));
+				}
+		return stack;
+	}
+	
+	private class Constraint{
+		public int ax, ay, bx, by;
+		Constraint(int ax, int ay, int bx, int by){
+			this.ax = ax; this.ay = ay;
+			this.bx = bx; this.by = by;
+		}
+	}
 }

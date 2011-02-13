@@ -19,7 +19,7 @@ public class SudokuTester {
 	 * @throws java.io.IOException
 	 */
 	public static void main(String[] argv) throws java.io.IOException {
-		SudokuSolver acSolver = new SudokuSolver();
+		RobustSudokuSolver acSolver = new RobustSudokuSolver();
 		System.out.println(acSolver.authors() + "\n");
 
 		/** Easy Sudokus */
@@ -72,7 +72,7 @@ public class SudokuTester {
 	 * 
 	 * @throws IOException
 	 */
-	private static void test(SudokuSolver acSolver, String boardName, boolean hasSolution, boolean verbose) throws IOException {
+	private static void test(RobustSudokuSolver acSolver, String boardName, boolean hasSolution, boolean verbose) throws IOException {
 		long time = System.currentTimeMillis();
 		try {
 			System.out.println("Board '" + boardName + "': ");
