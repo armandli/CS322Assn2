@@ -108,6 +108,18 @@ public class RobustSudokuSolver {
 		return ret;
 	}
 	
+	/**
+	 * This is the only modified section in Robust Sudoku Solver compared to Sudoku Solver.
+	 * domain split now returns a value indicating the number of solutions it has found.
+	 * if it is the root of the domain split search tree, we check how many solution found
+	 * and throws IOException if there is no solution or there is more than one solution
+	 * @param domains
+	 * @param board
+	 * @param stack
+	 * @param level    the level of the domain split search tree, the root is level 0
+	 * @return
+	 * @throws IOException
+	 */
   int domainSplit(BitSet[][] domains, int[][] board, Stack<Constraint> stack, int level) throws IOException {
 		gac(domains, board, stack);
 		boolean fin = true;
