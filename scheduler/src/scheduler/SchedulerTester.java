@@ -132,6 +132,7 @@ public class SchedulerTester {
 			} else {
 				System.out.println("; suboptimal (best solution cost is " + bestSolutionQual + ")");					
 			}
+			
 
 		} catch (Exception e) {
 			System.out.println("Instance '" + instanceFilename + "': crashed " + e);

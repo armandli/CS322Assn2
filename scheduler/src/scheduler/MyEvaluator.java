@@ -13,14 +13,16 @@ public class MyEvaluator implements Evaluator
    *  
    *  If the schedule isn't feasible (i.e. two exams are scheduled in the same
    *  room at the same time), the function returns a cost that is relative to
-   *  the total number of students taking exams and the total number of
-   *  conflicts experienced by students. Using this metric provides a more
-   *  elaborate "elevator" scoring system that shows the severity of the
-   *  conflicts with more granularity and accuracy.
+   *  the total number of students taking exams and the total number of course
+   *  conflicts. 
    *  
    *  As in OrigEvaluator, this function treats student constraints as lower
    *  priority, and counts up the number of times that a schedule asks a student
-   *  to be in two exams at the same time.
+   *  to be in two exams at the same time. It has the ability to count the number
+   *  of courses being assigned the same room and time and able to differentiate
+   *  that number. This improves the situation when you have multiple courses
+   *  having time + location conflicts, removing some of them, but not all of them
+   *  are considered to be an improvement instead of considered as no improvement.
    *  
    *  @param  pInstance the problem instance
    *  @param  pCandidateSchedule a candidate schedule (a list of timeslot and
@@ -74,9 +76,11 @@ public class MyEvaluator implements Evaluator
           // room.
           // 
           // For a more elaborate evaluation of exam collisions, return a score
-          // that is relative to the student body size and the number conflicts
-          // experienced by students
-          return pInstance.numStudents + conflicts;
+          // that is relative to the student body size and the number of course
+        	// conflicts. this guarantees that inherent course conflicts will have
+        	// larger consequence than student conflict, but allowing the differentiate
+        	// different number of course conflicts.
+          conflicts += pInstance.numStudents;
         }
       }
     }

@@ -55,7 +55,7 @@ public class SudokuTester {
 		 * A Sudoku that is exceptionally hard for brute-force algorithms. It is also challenging for AC with domain splitting (think why?). We are
 		 * not going to test your AC algorithms on this instance :-). Source: http://en.wikipedia.org/wiki/Algorithmics_of_sudoku
 		 */
-		// test(acSolver, "nearWorstCase", true, false); // Time: 1275s (bonus 1275s)
+		test(acSolver, "nearWorstCase", true, false); // Time: 1275s (bonus 1275s)
 		
 		/** Invalid Sudokus - bonus question */
 		// This Sudoku is invalid because it has no solutions - exception should be thrown.

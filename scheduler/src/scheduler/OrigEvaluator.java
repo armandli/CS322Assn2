@@ -9,7 +9,6 @@ import java.util.Vector;
  */
 
 public class OrigEvaluator implements Evaluator{
-
 	/**
 	 * This is a function that scores a complete assignment of variables. 
 	 * It takes as input a scheduling instance and a complete schedule (all courses have times assigned for their exams). 
@@ -30,7 +29,6 @@ public class OrigEvaluator implements Evaluator{
 		if (pCandidateSchedule == null){
 			return Integer.MAX_VALUE;
 		}
-			
 		/* Throw error for incomplete schedules */
 		if (pCandidateSchedule.length != pInstance.numCourses) {
 			throw new Exception("Incomplete Exam Schedule. Have to assign a time and room to every exam!");
