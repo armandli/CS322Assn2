@@ -105,7 +105,7 @@ public class SchedulerTester {
 		try {
 			System.out.println("Instance '" + instanceFilename + "': ");
 			SchedulingInstance instance = new SchedulingInstance(instanceFilename);
-			int sumOfCosts = 0;
+			double sumOfCosts = 0.0;
 			double avgCost;
 			
 			if (verbose){
