@@ -15,7 +15,7 @@ public class GreedyDescentWithRestartsScheduler extends Scheduler {
 	public String authorsAndStudentIDs() {
 		String ret = "NAMES OF THE AUTHORS AND THEIR STUDENT IDs (1 PER LINE)\n";
 		ret += "Yi (Armand) Li 61420048\n";
-		ret += "Jeff Cheung 66990462\n";
+		ret += "Jeffrey Cheung 66994062\n";
 		return ret;
 	}
 
