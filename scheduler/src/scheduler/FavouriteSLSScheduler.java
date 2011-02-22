@@ -13,7 +13,7 @@ public class FavouriteSLSScheduler extends Scheduler {
 	// K = 1 means the same as greedy descent, K = N means brute force combo breaker
 	// NOTE: you may change K to whatever value that suites your fancy, be warned, larger K
 	//       slower the game
-	private static int K = 1;
+	private static int K = 2;
 	private static int NULL = -1; 
 	
 	/**
@@ -63,6 +63,16 @@ public class FavouriteSLSScheduler extends Scheduler {
 		return bests;
 	}
 	
+	/**
+	 * iterate through all k possible combination of variable choices, iterate through
+	 * all possible values assigned to each choice of variables, and find the k
+	 * best assignments
+	 * @param in
+	 * @param s
+	 * @param path
+	 * @param selected
+	 * @throws Exception
+	 */
 	void BeamSearch(SchedulingInstance in, ScheduleChoice[] s, LinkedList<ChangeSet>[] path, Selected[] selected) throws Exception{
 		for (int i = 0; i < K; ++i){
 			applyChangeSet(s, path[i]);
@@ -83,6 +93,17 @@ public class FavouriteSLSScheduler extends Scheduler {
 		}
 	}
 	
+	/**
+	 * iterate through all possible values for the set of chosen variables
+	 * to see which value assignment produce the minimal constraint
+	 * @param in
+	 * @param s
+	 * @param c
+	 * @param selected
+	 * @param path
+	 * @param pv
+	 * @throws Exception
+	 */
 	void findOptimalAssignment(SchedulingInstance in, ScheduleChoice[] s, Choice c, Selected[] selected, LinkedList<ChangeSet> path, int[] pv) throws Exception{
 		int[] assignments = new int[K];
 		do {
@@ -103,6 +124,11 @@ public class FavouriteSLSScheduler extends Scheduler {
 		} while (incrementIterate(in, c, assignments));
 	}
 	
+	/**
+	 * produce a randomly assigned schedule
+	 * @param in
+	 * @return
+	 */
 	ScheduleChoice[] randomAssignment(SchedulingInstance in){
 		ScheduleChoice[] choice = new ScheduleChoice[in.numCourses];
 		for (int i = 0; i < in.numCourses; ++i){
@@ -113,6 +139,13 @@ public class FavouriteSLSScheduler extends Scheduler {
 		return choice;
 	}
 	
+	/**
+	 * return the first choice used for the permutation function to permute through
+	 * all permutations of variable choices
+	 * @param in
+	 * @param s
+	 * @return
+	 */
 	Choice permSeed(SchedulingInstance in, ScheduleChoice[] s){
 		assert( in.numCourses * 2 <= K );
 		Choice c = new Choice(new ArrayList<Integer>(K), new ArrayList<Boolean>(K));
@@ -123,6 +156,15 @@ public class FavouriteSLSScheduler extends Scheduler {
 		return c;
 	}
 	
+	/**
+	 * return all permutations of possible variable choice combinations there could be
+	 * @param in
+	 * @param s
+	 * @param c
+	 * @param k
+	 * @param move
+	 * @return whether or not all permutation of choices has been produced or not
+	 */
 	boolean permutation(SchedulingInstance in, ScheduleChoice[] s, Choice c, int k, boolean move){
 		if (k == 1){
 			if (c.courses.get(K - 1) >= in.numCourses)
@@ -160,18 +202,42 @@ public class FavouriteSLSScheduler extends Scheduler {
 		return true;
 	}
 	
+	/**
+	 * turns a course variable, whether a room or time slot, into a unique enumerate ID
+	 * @param course
+	 * @param isRoom
+	 * @return the ID representing this variable
+	 */
 	int varToID(int course, boolean isRoom){
 		return course * 2 + (isRoom ? 0 : 1);
 	}
 	
+	/**
+	 * determine which course this enumerated variable ID is
+	 * @param id
+	 * @return the course number
+	 */
 	int IDToCourse(int id){
 		return id / 2;
 	}
 	
+	/**
+	 * determine if a enumerated variable ID indicate a room variable or time slot variable
+	 * @param id
+	 * @return whether it is a room (true) or timeslot (false)
+	 */
 	boolean IDToRoom(int id){
 		return (id % 2 == 0 ? true : false);
 	}
 	
+	/**
+	 * return the maximum value that can be assigned to a variable i in set of variables 
+	 * selected within data struct c
+	 * @param in
+	 * @param c
+	 * @param index
+	 * @return
+	 */
 	int maxDom(SchedulingInstance in, Choice c, int index){
 		if (c.isRoom.get(index))
 			return in.numRooms;
@@ -179,6 +245,15 @@ public class FavouriteSLSScheduler extends Scheduler {
 			return in.numTimeslots;
 	}
 	
+	/**
+	 * iterative through all the values for a set of variables stated within
+	 * Choice data struct c ( all possible value combiations of the set ),
+	 * returning one at a time, like a coroutine 
+	 * @param in
+	 * @param c
+	 * @param nums
+	 * @return
+	 */
 	boolean incrementIterate(SchedulingInstance in, Choice c, int[] nums){
 		int i = 0;
 		int count = 0;
@@ -192,6 +267,13 @@ public class FavouriteSLSScheduler extends Scheduler {
 		return true;
 	}
 	
+	/**
+	 * apply to a list of variables chosen by data struct Choice, the values
+	 * within the int array assign for schedule s
+	 * @param s
+	 * @param c
+	 * @param assign
+	 */
 	void applyAssignment(ScheduleChoice[] s, Choice c, int[] assign){
 		for (int i = 0; i < c.courses.size(); ++i)
 			if (c.isRoom.get(i))
@@ -199,7 +281,12 @@ public class FavouriteSLSScheduler extends Scheduler {
 			else
 				s[c.courses.get(i)].timeslot = assign[i];
 	}
-
+	
+	/**
+	 * makes a deep copy of a list of change sets
+	 * @param d
+	 * @return
+	 */
 	LinkedList<ChangeSet> cloneChangeSet(LinkedList<ChangeSet> d){
 		LinkedList<ChangeSet> ret = new LinkedList<ChangeSet>();
 		Iterator<ChangeSet> it = d.iterator();
@@ -208,6 +295,11 @@ public class FavouriteSLSScheduler extends Scheduler {
 		return ret;
 	}
 	
+	/**
+	 * takes a list of change sets and apply it to the schedule 
+	 * @param schedule
+	 * @param set
+	 */
 	void applyChangeSet(ScheduleChoice[] schedule, LinkedList<ChangeSet> set){
 		Iterator<ChangeSet> it = set.iterator();
 		while (it.hasNext()){
@@ -221,6 +313,12 @@ public class FavouriteSLSScheduler extends Scheduler {
 		}
 	}
 	
+	/**
+	 * takes a list of change sets and reverse the schedule back to its
+	 * original state
+	 * @param schedule
+	 * @param set
+	 */
 	void unapplyChangeSet(ScheduleChoice[] schedule, LinkedList<ChangeSet> set){
 		Iterator<ChangeSet> it = set.descendingIterator();
 		while (it.hasNext()){
@@ -234,6 +332,12 @@ public class FavouriteSLSScheduler extends Scheduler {
 		}
 	}
 	
+	/**
+	 * data object collecting k changes from previous state to this state where courses
+	 * are the variables with the change. isRoom is a vector of boolean that indicate 
+	 * if the change in the variable is for the room (true) or time slot (false). 
+	 * vals are the new values being assigned and prev_vals are the previous values
+	 */
 	private class ChangeSet{
 		ArrayList<Integer> courses, vals, prev_vals;
 		ArrayList<Boolean> isRoom;
@@ -242,6 +346,12 @@ public class FavouriteSLSScheduler extends Scheduler {
 		}
 	}
 	
+	/**
+	 * data object storing a candidate information for the next step. 
+	 * it has everything required to describe a ChangeSet object, plus
+	 * a score indicating what score this candidate obtained
+	 *
+	 */
 	private class Selected{
 		ArrayList<Integer> courses, vals, prev_vals;
 		ArrayList<Boolean> isRoom;
@@ -252,6 +362,11 @@ public class FavouriteSLSScheduler extends Scheduler {
 		}
 	}
 	
+	/**
+	 * data object representing which course, specifically the room of the course or the 
+	 * time slot of the course has been chosen to be modified
+	 *
+	 */
 	private class Choice{
 		ArrayList<Integer> courses;
 		ArrayList<Boolean> isRoom;
